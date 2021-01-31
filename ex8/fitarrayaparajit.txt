@@ -1,0 +1,176 @@
+#include <stdio.h>
+#include <stdlib.h>
+struct process 			//PROCESS
+{
+  char pname[20]; //PROCESS NAME
+  int pro_size; //PROCESS SIZE
+  int flag;
+};
+typedef struct process PROCESS;
+struct partition
+{
+  int par_size;		//PARTITION SIZE
+  int flag;
+};
+typedef struct partition PAR;
+void get_process(PROCESS *P,int n)//READ PROCESS DETAILS
+{
+  int i;
+  for(i=0;i<n;i++)
+  {
+    printf("\nEnter the Process Name:");
+    scanf("%s",P[i].pname);
+    printf("\nEnter the Process size(KB):");
+    scanf("%d",&P[i].pro_size);
+    P[i].flag=0;
+  }
+}
+void get_partition(PAR *PR,int n)//READ PARTITION DETAILS
+{
+  int i;
+  for(i=0;i<n;i++)
+  {
+    printf("\Enter the Size of Partition %d (KB) :",i+1);
+    scanf("%d",&PR[i].par_size);
+    PR[i].flag=0;
+  }
+}
+void first_fit(PROCESS *P,PAR *PR,int n,int m)//FIRST FIT SCHEME
+{
+  int i,j=0,par_size;
+  for(i=0;i<n;i++)
+  {
+    for(j=0;j<m;j++)
+    {
+      if((P[i].pro_size<=PR[j].par_size)&&(P[i].flag!=1)&&(PR[j].flag!=1))//CHECK IF PROCESS FITS IN PARTITION
+      {
+        par_size=PR[j].par_size;
+        PR[i].par_size-=P[i].pro_size;
+        P[i].flag=1;
+        PR[j].flag=1;
+        printf("\nProcess %d (%d) is loaded in the Partition %d of size %d",i+1,P[i].pro_size,j+1,par_size);
+      }
+    }
+
+  }
+  for(i=0;i<n;i++)
+  {
+    if(P[i].flag==0)
+    {
+      printf("\nProcess %d (%d) can't be loaded in the partition using First Fit Scheme...",P[i].pro_size,i+1);
+    }
+  }
+}
+void best_fit(PROCESS *P,PAR *PR,int n,int m)//BEST FIT SCHEME
+{
+  int i,j,temp,par_size;
+  for(i=0;i<m;i++)
+  {
+    for(j=i+1;j<=m-1;j++)
+    {
+      if(PR[i].par_size<PR[j].par_size) //SORT PARTITION SIZE IN ASCENDING ORDER
+      {
+        temp=PR[i].par_size;
+        PR[i].par_size=PR[j].par_size;
+        PR[j].par_size=temp;
+      }
+    }
+  }
+  for(i=0;i<n;i++)
+  {
+    for(j=0;j<m;j++)
+    {
+      if((P[i].pro_size<=PR[j].par_size)&&(P[i].flag!=1)&&(PR[j].flag!=1))//CHECK IF PROCESS FITS
+      {
+        par_size=PR[j].par_size;
+        PR[i].par_size-=P[i].pro_size;
+        P[i].flag=1;
+        PR[j].flag=1;
+        printf("\nProcess %d (%d) is loaded in the Partition %d of size %d",i+1,P[i].pro_size,j+1,par_size);
+      }
+    }
+
+  }
+  for(i=0;i<n;i++)
+  {
+    if(P[i].flag==0)
+    {
+      printf("\nProcess %d (%d) can't be loaded in the partition using Best Fit Scheme...",i+1,P[i].pro_size);
+    }
+  }
+}
+void worst_fit(PROCESS *P,PAR *PR,int n,int m)
+{
+  int i,j,temp,par_size;
+  for(i=0;i<m;i++)
+  {
+    for(j=i+1;j<=m-1;j++)
+    {
+      if(PR[i].par_size<PR[j].par_size)//SORT PARTITION SIZE IN DESCENDING ORDER
+      {
+        temp=PR[i].par_size;
+        PR[i].par_size=PR[j].par_size;
+        PR[j].par_size=temp;
+      }
+    }
+  }
+  for(i=0;i<n;i++)
+  {
+    for(j=0;j<m;j++)
+    {
+      if((P[i].pro_size<=PR[j].par_size)&&(P[i].flag!=1)&&(PR[j].flag!=1))//CHECK IF PROCESS FITS IN PARTITION
+      {
+        par_size=PR[j].par_size;
+        PR[i].par_size-=P[i].pro_size;
+        P[i].flag=1;
+        PR[j].flag=1;
+        printf("\nProcess %d (%d KB) is loaded in the Partition %d of size %d",i+1,P[i].pro_size,j+1,par_size);
+      }
+    }
+
+  }
+  for(i=0;i<n;i++)
+  {
+    if(P[i].flag==0)
+    {
+      printf("\nProcess %d (%d KB) can't be loaded in the partition using Worst Fit Scheme...",i+1,P[i].pro_size);
+    }
+  }
+}
+
+
+void main()
+{
+  PROCESS *P; //POINTER TO PROCESS STRUCTURE
+  PAR *PR,*PR1,*PR2; //POINTER TO PARTITION STRUCTURE
+  int no_pro,no_par,i,j,cho;
+  printf("\n\t***CONTIGIOUS MEMORY ALLOCATION SCHEME***");
+  printf("\nEnter the Number of Processes:");
+  scanf("%d",&no_pro); 			//READ NO.OF PROCESSES
+  P=(PROCESS*)malloc(sizeof(PROCESS)*no_pro);
+  printf("\nEnter the Number of Partitions:");
+  scanf("%d",&no_par); //READ NO.OF PARTITION
+  PR=(PAR*)malloc(sizeof(PAR)*no_par);
+  printf("\n\t***PROCESS DETAILS***");
+  get_process(P,no_pro);
+  printf("\n\t***PARTITION DETAILS***");
+  get_partition(PR,no_par);
+  PR1=PR;
+  PR2=PR;
+  do
+  {
+    printf("\n\tFIXED PARTITION MEMORY SCHEME\n1.First Fit Scheme\n2.Best Fit scheme\n3.Worst Fit scheme\n4.Exit\n\tEnter your choice:");
+    scanf("%d",&cho);
+    switch(cho)
+    {
+    case 1: 	first_fit(P,PR,no_pro,no_par);
+      break;
+    case 2:	best_fit(P,PR1,no_pro,no_par);
+      break;
+    case 3:	worst_fit(P,PR2,no_pro,no_par);
+      break;
+    case 4: 	exit(0);
+    default: printf("\nEnter the correct choice...");
+    }
+  }while(cho!=4);
+}

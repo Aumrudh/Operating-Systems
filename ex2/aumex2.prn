@@ -1,0 +1,495 @@
+Script started on Tuesday 23 July 2019 12:55:42 PM IST
+[?1034h[18bit034@mepcolinux ex2]$cat fork.c 
+//Programmed BY AUMRUDH LAL KUMAR TJ
+//Implementation of IPC using pipes
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+main()
+{
+    pid_t p1,p2,p3;
+    p1=fork();
+    if(p1==-1)
+     {
+        printf("Process p1 not created\n");
+        exit(1);
+     }
+    else if(p1>0)
+      {
+        printf("First Process Parent p1 Executed and Process id for p1 is %d\n",getpid());
+      }
+    else
+     {
+        printf("Child Process p2 executed and process id is %d\n",getpid());
+        printf("Parent process id for p2 is %d\n",getppid());
+     }
+    p2=fork();
+    if(p1==-1&&p2==-1)
+     {
+        printf("Process p2 not created\n");
+        exit(1);
+     }
+    else if(p1>0&&p2==0)
+      {
+        printf("Process p3 Executed and Process id for p3 is %d\n",getpid());
+        printf("Parent process id for p3 is %d\n",getppid());
+      }
+    else if(p1==0&&p2==0)
+     {
+        printf("Child Process p4 executed and process id is %d\n",getpid());
+        printf("Parent process id for p4 is %d\n",getppid());
+     }
+    else
+     {
+       printf("\n");
+     }
+   if(p1==0&&p2>0)
+    {
+      p3=fork();
+      if(p3<0)
+        {
+           printf("Proess p3 not excuted\n");
+           exit(1);
+        }
+      else if(p3==0)
+        {
+          printf("Child Process p5 executed and process id is %d\n",getpid());
+          printf("Parent process id for p5 is %d\n",getppid());
+        }
+      else
+       {
+           printf("\n");
+        }
+    }
+}
+[18bit034@mepcolinux ex2]$cc fork.c 
+[18bit034@mepcolinux ex2]$./a.out 
+First Process Parent p1 Executed and Process id for p1 is 66342
+Child Process p2 executed and process id is 66343
+
+Parent process id for p2 is 66342
+Process p3 Executed and Process id for p3 is 66344
+Parent process id for p3 is 66342
+
+Child Process p4 executed and process id is 66345
+
+Parent process id for p4 is 66343
+Child Process p5 executed and process id is 66346
+Parent process id for p5 is 66343
+[18bit034@mepcolinux ex2]$cat sum.c 
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include<fcntl.h>
+main()
+{
+    pid_t f;
+    int p,a[2],n,no[40],i,no1[40];
+     int sum=0;
+     printf("Enter number of integers\n");
+     scanf("%d",&n);
+     printf("Give some n integers %d\n",n);
+    p=pipe(a);
+    if(p==-1)
+     {
+        printf("Pipe Creation failed\n");
+        exit(1);
+     }
+    f=fork();
+   if(f==-1)
+     {
+        printf("Fork Creation failed\n");
+        exit(1);
+     }
+   else if (f==0)
+    {
+        for(i=0;i<n;i++)
+        {
+          scanf("%d",&no[i]);
+        }
+        for(i=0;i<n;i++)
+        {
+          close(a[0]);
+          write(a[1],&no[i],sizeof(int));
+        }
+    }
+   else
+    {
+       wait(&f);
+       for(i=0;i<n;i++)
+       {
+         read(a[0],&no1[i],sizeof(int));
+         printf("Numebers are : %d\n",no1[i]);
+         if(no1[i]%2==0)
+           {
+             sum+=no1[i];
+           }
+      }
+      close(a[0]);
+      printf("Sums is : %d\n",sum);
+    }
+}
+[18bit034@mepcolinux ex2]$cc sum.c 
+[18bit034@mepcolinux ex2]$./a.out 
+Enter number of integers
+5
+Give some n integers 5
+1 2 3 4 5
+Numebers are : 1
+Numebers are : 2
+Numebers are : 3
+Numebers are : 4
+Numebers are : 5
+Sums is : 6
+[18bit034@mepcolinux ex2]$cat prime.c 
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include<fcntl.h>
+main()
+{
+    pid_t f1,f2;
+    int p1,a[2],p2,b[2],i,n[100],count=0,j,sum=0,flag=1,temp[100];
+    p1=pipe(a);
+    if(p1==-1)
+     {
+        printf("Pipe Creation failed\n");
+        exit(1);
+     }
+    p2=pipe(b);
+    if(p2==-1)
+     {
+        printf("Pipe Creation failed\n");
+        exit(1);
+     }
+    f1=fork();
+    if(f1==-1)
+     {
+        printf("Fork Creation failed\n");
+        exit(1);
+     }
+    else if (f1==0)
+    {
+        printf("Enter 10 number : ");
+        for(i=0;i<10;i++)
+        {
+          scanf("%d",&n[i]);
+          write(a[1],&n[i],sizeof(int));
+        }
+        close(b[0]);
+          for(i=0;i<10;i++)
+          {
+            if(n[i]%2!=0)
+                {
+                  temp[i]=n[i];
+                  count++;
+                }
+          }
+                  for(i=0;i<count;i++)
+                   {
+                    write(b[1],&temp[i],sizeof(int));
+                   }
+    }
+   else
+    {
+      wait(&f1);
+      for(i=1;i<=10;++i)
+      {
+       read(a[0],&n[i],sizeof(int));
+       flag=0;
+       for(j = 2; j <= n[i]/2; j++)
+       {
+         if(n[i]%j==0)
+         {
+            flag=1;
+            //break;
+         }
+       }
+       if(flag==0 && n[i]!=1 )
+         printf("Prime number -  : %d\n",n[i]);
+      }
+    }
+   if(f1==0)
+   {
+   f2=fork();
+    if(f1==0&&f2==0)
+       {
+	 wait(&f2);
+         for(i=0;i<count;i++)
+          {
+           read(b[0],&temp[i],sizeof(int));
+           sum=sum+n[i];
+          }
+        printf("Sum is : %d\n",sum);
+       }
+    else
+     {
+       wait(&f2);
+     }
+    }
+}
+[18bit034@mepcolinux ex2]$cc prime.c 
+[18bit034@mepcolinux ex2]$./a.out 
+Enter 10 number : 1 2 3 4 5 6 7 8 9 10
+Sum is : 15
+Prime number -  : 2
+Prime number -  : 3
+Prime number -  : 5
+Prime number -  : 7
+[18bit034@mepcolinux ex2]$cat fc.c 
+#include<stdio.h>
+#include<unistd.h>
+#include<string.h>
+#include<stdlib.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<fcntl.h>
+main()
+{
+     pid_t firstChild,secondChild;
+     int wc=0,lc=0,cc=0,p1,a[2],p2,b[2],i=0,linebuffer=1;
+     char line[50],temp[50];
+     FILE *fd;
+     //Pipe Creation
+     p1=pipe(a);
+     if(p1==-1)
+      {
+         printf("Pipe 1 Not Created\n");
+         exit(1);
+      }
+     p2=pipe(b);
+     if(p2==-1)
+      {
+         printf("Pipe 1 Not Created\n");
+         exit(1);
+      }
+
+
+      firstChild = fork();
+      if(firstChild > 0)
+      {
+        wait(&firstChild);
+        // In parent
+        secondChild = fork();
+        if(secondChild > 0)
+        {
+           // In parent
+        }
+        else if(secondChild < 0)
+        {
+          // Error
+          printf("SecondChild Error");
+        }
+        else {
+          // In secondChild
+          printf("Inside SecondChild\n");
+          close(a[1]);
+          read(a[0], temp, sizeof(temp));
+          printf("Contents Read from Pipe A and Written to Pipe B %s\n",temp);
+          printf("Couting Now\n");
+          while (temp[i]!='\0') {
+              cc++;
+              //printf("%c",temp[i]);
+              if(temp[i]==' ') {
+                 wc++;
+              }
+              if(temp[i]=='\n') {
+                lc++;
+              }
+              i++;
+            }
+            printf("Word Count : %d\n",wc);
+            printf("Character count : %d\n",cc);
+            fd=fopen("a.txt","w");
+            if(fd==-1) {
+               printf("File not opened\n");
+               exit(1);
+            }
+            else {
+              fprintf(fd,"%s", temp);
+              fclose(fd);
+            }
+         
+        }
+      }
+      else if(firstChild < 0 )
+      {
+        // Error
+         printf("FirstChild Error");
+      }
+      else
+      {
+        // In firstChild
+        printf("Inside FirstChild\n" );
+        printf("Enter the line you want\n");
+        gets(line);
+        write(a[1],&line,sizeof(line));
+        printf("Contents are Written in Pipe are -> %s \n",line);
+        close(a[1]);
+      }
+}
+[18bit034@mepcolinux ex2]$cc fc.c 
+[18bit034@mepcolinux ex2]$./a.out 
+Inside FirstChild
+Enter the line you want
+aumrudh lal
+Contents are Written in Pipe are -> aumrudh lal 
+Inside SecondChild
+Contents Read from Pipe A and Written to Pipe B aumrudh lal
+Couting Now
+Word Count : 1
+Character count : 11
+[18bit034@mepcolinux ex2]$cat a.txt 
+aumrudh lal[18bit034@mepcolinux ex2]$cat arm.c 
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<unistd.h>
+#include<unistd.h>
+#include<stdio.h>
+#include<math.h>
+#include<stdlib.h>
+main()
+{
+ int p,a[2],num,n,n1,sum=0,rem;
+ p=pipe(a);
+ pid_t x;
+ x=fork();
+ if(x==0)
+ {
+  printf("\n Enter number to be tested!");
+  scanf("%d",&num);
+  close(a[0]);
+  write(a[1],&num,2);
+ }
+ if(x>0)
+ {
+  wait(); 
+  read(a[0],&n1,2);
+  printf("%d",n1);
+  n=n1;
+  for(;n1>0;n1=n1/10)
+  {
+    rem=n1%10;
+    sum+=pow(rem,3);
+  }
+  if(sum==n)
+   printf("\n The given number is a armstrong number!%d\n",sum);
+  else
+   printf("\n Its is not a armstrong number!%d\n",sum);
+ }
+}
+
+[18bit034@mepcolinux ex2]$cc -lm arm.c 
+[18bit034@mepcolinux ex2]$./a.out 
+
+ Enter number to be tested!153
+153
+ The given number is a armstrong number!153
+[18bit034@mepcolinux ex2]$./a.out 
+
+ Enter number to be tested!253
+253
+ Its is not a armstrong number!160
+[18bit034@mepcolinux ex2]$cat file.c 
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<unistd.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+int main()
+{
+ int a[2],p,fd1;
+ pid_t x;
+ p=pipe(a);
+ if(p==-1)
+  printf("\n Pipe creation failed!");
+ char n[10],cp;
+ x=fork();
+ printf("\n Enter filename to be opened!");
+ scanf("%s",n);
+ if(x>0)
+ {
+  printf("\n Parent ID is:%d\n",getpid());
+  close(a[0]);
+  write(a[1],&n,sizeof(n));
+ }
+ if(x==0)
+ {
+  printf("\n Child ID is:%d\n",getpid());
+  read(a[0],&n,sizeof(n));
+  fd1=open(n,O_RDONLY);
+  if(fd1==-1)
+  {
+   printf("\n File doesnt opened!");
+  }
+  while(read(fd1,&cp,1)>0)
+  { 
+    printf("%c",cp);
+  }
+}
+ close(fd1);
+return(0);
+}
+
+
+[18bit034@mepcolinux ex2]$cc file.c 
+[18bit034@mepcolinux ex2]$./a.out 
+
+ Enter filename to be opened!
+ Enter filename to be opened!a.txt
+
+ Parent ID is:67073
+[18bit034@mepcolinux ex2]$
+ Child ID is:67074
+[18bit034@mepcolinux ex2]$cat leap.c 
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<unistd.h>
+#include<unistd.h>
+#include<stdio.h>
+#include<stdlib.h>
+main()
+{
+ int p,a[2],year,y,rem_4,rem_100,rem_400;
+ p=pipe(a);
+ pid_t x;
+ x=fork();
+ if(x==0)
+ {
+  printf("\n Enter year to be tested!");
+  scanf("%d",&year);
+  close(a[0]);
+  write(a[1],&year,2);
+ }
+ if(x>0)
+ {
+  //wait(&a);
+  read(a[0],&y,2);
+  rem_4=y%4;
+  rem_100=y%100;
+  rem_400=y%400;
+  if((rem_4==0 && rem_100!=0)||rem_400==0)
+    printf("\n The given year is a leap year!\n");
+  else
+    printf("\n Not a leap year!\n");
+ }
+}
+
+[18bit034@mepcolinux ex2]$cc leap.c 
+[18bit034@mepcolinux ex2]$./a.out 
+
+ Enter year to be tested!2020
+
+ The given year is a leap year!
+[18bit034@mepcolinux ex2]$,[K./a.out 
+
+ Enter year to be tested!4566
+
+ Not a leap year!
+[18bit034@mepcolinux ex2]$exit
+exit
+
+Script done on Tuesday 23 July 2019 12:59:39 PM IST

@@ -1,0 +1,563 @@
+[18bit034@mepcolinux recpu]$cat prio.c 
+
+//LINKED LIST CPU SCHDULING
+
+//PRIORITY
+
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+
+typedef struct PRI
+{
+        float wt;
+        float tt;
+        float bt;
+        int pno;
+        int pt;
+}pri;
+
+typedef struct listnode
+{
+pri pr;
+struct listnode *next;
+}node;
+typedef node *ptrtonode;
+typedef ptrtonode list;
+typedef ptrtonode position;
+
+list initialize();
+void insert(int,float,int,list);
+void display(list);
+int count(list);
+position calculate(list,int);
+position sort(list);
+
+position sort(list l)
+{
+position temp;
+temp=(position)malloc(sizeof(position)*1);
+
+position p,q;
+
+for(p=l->next;p->next!=NULL;p=p->next)
+{
+
+for(q=p->next;q!=NULL;q=q->next)
+{
+if(p->pr.pt>q->pr.pt)
+
+{
+pri temp;
+temp=p->pr;
+p->pr=q->pr;
+q->pr=temp;
+}
+}
+}
+return l;
+}
+
+void display(list l)
+{
+float avgwt,avgtt,tottt=0,totwt=0;
+int c=0;
+position p=l->next;
+printf("\nPno\tWT\t TT\t BT\t Priority\n");
+while(p!='\0')
+{
+printf("\n %d \t%.2f\t%.2f\t%.2f\t%d\n",p->pr.pno,p->pr.wt,p->pr.tt,p->pr.bt,p->pr.pt);
+c++;
+p=p->next;
+}
+
+}
+position calculate(list l,int n)
+{
+        float totwt=0,tottt=0,avgwt,agtt;
+
+        position xx;
+        position p,q,temp;
+        p=l->next;
+        xx=l->next;
+        p->pr.wt=0;
+        p->pr.tt=p->pr.bt;
+        q=p;
+        p=p->next;
+        while(p!=NULL)
+        {
+                p->pr.wt=q->pr.tt;
+                p->pr.tt=q->pr.tt+p->pr.bt;
+                totwt=totwt+p->pr.wt;
+                tottt=tottt+p->pr.tt;
+                p=p->next;
+                q=q->next;
+         display(l);
+                l->next=xx->next;
+                display(l);
+                xx=xx->next;
+                printf("\nTotal waiting time\t %.2f\nTotal turnarond time %.2f\n",totwt,tottt);
+        }
+        printf("\nAverage waitingtime\t%.2f\nAverage turn arond timt\t%.2f\n",totwt/n,tottt/n);
+                return l;
+}
+
+
+
+int count(list l)
+{
+position p;
+int count=1;
+p=l->next;
+while(p!=NULL)
+{
+count++;
+p=p->next;
+}
+return count;
+}
+
+void insert(int pn,float btt,int A,list l)
+{
+
+position temp1;
+temp1=(position)malloc(sizeof(position)*1);
+temp1->pr.pno=pn;
+temp1->pr.bt=btt;
+temp1->pr.tt=0;
+temp1->pr.pt=A;
+
+position p1,q;
+q=l;
+p1=l->next;
+while(p1!=NULL)
+{
+q=q->next;
+p1=p1->next;
+}
+temp1->next=NULL;
+p1=temp1;
+q->next=p1;
+}
+
+position initialize()
+{
+position temp;
+temp=(position)malloc(sizeof(position)*1);
+if(temp==NULL)
+{
+printf("\n error in initialize\n");
+ }
+else
+{
+
+temp->pr.bt=0;
+temp->pr.tt=0;
+temp->pr.wt=0;
+temp->pr.pno=0;
+temp->pr.pt=0;
+temp->next=NULL;
+
+return temp;
+  }
+}
+
+
+main()
+{
+int ch;
+
+int a,i;
+float B;
+int z;
+list l1;
+l1=initialize();
+int nn;
+printf("\nEnter total no of Process : ");
+scanf("%d",&nn);
+for(i=0;i<nn;i++)
+{
+printf("\nEnter process no : ");
+scanf("%d",&a);
+printf("\nEnter burst time : ");
+scanf("%f",&B);
+printf("\nEnter Priority ");
+scanf("%d",&z);
+insert(a,B,z,l1);
+
+
+}
+l1=sort(l1);
+printf("\nAfter Sorting \n\n");
+display(l1);
+l1=calculate(l1,nn);
+display(l1);
+
+
+int tt;
+tt=count(l1);
+printf("\n\nTotal no of nodes %d \n",tt);
+
+}
+[18bit034@mepcolinux recpu]$./a.out 
+
+Enter total no of Process : 2
+
+Enter process no : 1
+
+Enter burst time : 2
+
+Enter Priority 0
+
+Enter process no : 2
+
+Enter burst time : 5
+
+Enter Priority 1
+
+After Sorting 
+
+
+Pno	WT	 TT	 BT	 Priority
+
+ 1 	0.00	0.00	2.00	0
+
+ 2 	0.00	0.00	5.00	1
+
+Pno	WT	 TT	 BT	 Priority
+
+ 1 	0.00	2.00	2.00	0
+
+ 2 	2.00	7.00	5.00	1
+
+Pno	WT	 TT	 BT	 Priority
+
+ 2 	2.00	7.00	5.00	1
+
+Total waiting time	 2.00
+Total turnarond time 7.00
+
+Average waitingtime	1.00
+Average turn arond timt	3.50
+
+Pno	WT	 TT	 BT	 Priority
+
+ 2 	2.00	7.00	5.00	1
+
+
+Total no of nodes 2 
+
+
+[18bit034@mepcolinux recpu]$cat rr.c 
+
+//ROUND ROBIN
+
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+
+typedef struct RR
+{
+        int entry;
+float ct;
+        float bt2;
+        float wt;
+        float tt;
+        float bt;
+        int pno;
+
+}rr;
+
+typedef struct listnode
+{
+rr pr;
+struct listnode *next;
+}node;
+typedef node *ptrtonode;
+typedef ptrtonode list;
+typedef ptrtonode position;
+
+list initialize();
+void insert(int,float,list);
+void display(list);
+int count(list);
+void calculate(list,int);
+position sortbt(list);
+position sortpno(list);
+
+position sortpno(list l)
+{
+position temp;
+temp=(position)malloc(sizeof(position)*1);
+
+position p,q;
+
+for(p=l->next;p->next!=NULL;p=p->next)
+{
+
+for(q=p->next;q!=NULL;q=q->next)
+{
+if(p->pr.pno>q->pr.pno)
+
+{
+rr  temp;
+temp=p->pr;
+p->pr=q->pr;
+q->pr=temp;
+}
+}
+}
+return l;
+}
+
+
+
+position sortbt(list l)
+{
+position p,q;
+
+for(p=l->next;p->next!=NULL;p=p->next)
+{
+
+for(q=p->next;q!=NULL;q=q->next)
+{
+if(p->pr.bt>q->pr.bt)
+
+{
+rr  temp;
+temp=p->pr;
+p->pr=q->pr;
+q->pr=temp;
+}
+}
+}
+return l;
+}
+
+
+void display(list l)
+{
+float avgwt,avgtt,tottt=0,totwt=0;
+int c=0;
+position p=l->next;
+printf("\n pno\tbt\t wt\t tt\t ct\n");
+while(p!='\0')
+{
+printf("\n %d\t%.2f\t%.2f\t%.2f\t%.2f\n",p->pr.pno,p->pr.bt2,p->pr.wt,p->pr.tt,p->pr.ct);
+p=p->next;
+}
+
+
+}
+
+void calculate(list ll,int n)
+{
+int ts;
+printf("\nEnter time slice : ");
+scanf("%d",&ts);
+        position j,p,q,temp;
+float tottt=0,totwt=0;
+int index=0,count=0;
+ll=sortpno(ll);
+p=ll->next;
+while(count!=n)
+{
+if(p==NULL)
+{
+p=ll;
+}
+
+if(p->pr.bt!=0)
+{
+p->pr.bt-=ts;
+index+=ts;
+p->pr.entry++;
+if(p->pr.bt<=0)
+{
+index+=p->pr.bt;
+p->pr.entry-=1;
+p->pr.bt=0.0;
+p->pr.ct=index;
+count++;
+}
+}
+
+
+p=p->next;
+}
+
+
+
+
+sortpno(ll);
+ j= ll->next;
+while(j!=NULL)
+{
+j->pr.wt=j->pr.ct-(j->pr.entry*ts);
+j->pr.tt=j->pr.ct;
+totwt=j->pr.wt+totwt;
+tottt=j->pr.tt+tottt;
+display(ll);
+j=j->next;
+ll->next=j;
+}
+
+
+
+       
+display(ll);
+printf("\n\n\n");
+printf("Total waiting itme is : %.2f\n",totwt);
+printf("Total turnarond  itme is : %.2f\n",tottt);
+printf("Average  waiting itme is : %.2f\n",totwt/n);
+printf("Average turnarond time  is : %.2f\n",tottt/n);
+
+}
+
+int count(list l)
+{
+position p;
+int count=1;
+p=l->next;
+while(p!=NULL)
+{
+count++;
+p=p->next;
+}
+return count;
+}
+
+void insert(int pn,float btt,list l)
+{
+
+position temp1;
+temp1=(position)malloc(sizeof(position)*1);
+temp1->pr.pno=pn;
+temp1->pr.bt=btt;
+temp1->pr.bt2=btt;
+temp1->pr.tt=0;
+temp1->pr.entry=0;
+
+position p1,q;
+q=l;
+p1=l->next;
+while(p1!=NULL)
+{
+q=q->next;
+p1=p1->next;
+}
+temp1->next=NULL;
+p1=temp1;
+q->next=p1;
+}
+
+position initialize()
+{
+position temp;
+temp=(position)malloc(sizeof(position)*1);
+if(temp==NULL)
+{
+printf("\nError in initialize\n");
+ }
+else
+{
+
+temp->pr.bt=0;
+temp->pr.tt=0;
+temp->pr.wt=0;
+temp->pr.pno=0;
+temp->pr.entry=0;
+temp->next=NULL;
+
+return temp;
+  }
+}
+
+
+main()
+{
+int ch;
+
+int a,i;
+float B;
+int z;
+list l1;
+l1=initialize();
+int nn;
+printf("\nEnter total no of process\n");
+scanf("%d",&nn);
+for(i=0;i<nn;i++)
+{
+printf("\nEnter process no\n");
+scanf("%d",&a);
+printf("\nEnter burst time\n");
+scanf("%f",&B);
+
+insert(a,B,l1);
+
+
+}
+calculate(l1,nn);
+
+
+int tt;
+tt=count(l1);
+printf("\n\nTotal no of nodes %d \n",tt);
+
+ }
+[18bit034@mepcolinux recpu]$cc rr.c
+[18bit034@mepcolinux recpu]$./a.out 
+
+Enter total no of process
+3
+
+Enter process no
+1
+
+Enter burst time
+5
+
+Enter process no
+2
+
+Enter burst time
+10
+
+Enter process no
+3
+
+Enter burst time
+4
+
+Enter time slice : 2
+
+ pno	bt	 wt	 tt	 ct
+
+ 1	5.00	9.00	13.00	13.00
+
+ 2	10.00	0.00	0.00	19.00
+
+ 3	4.00	0.00	0.00	12.00
+
+ pno	bt	 wt	 tt	 ct
+
+ 2	10.00	11.00	19.00	19.00
+
+ 3	4.00	0.00	0.00	12.00
+
+ pno	bt	 wt	 tt	 ct
+
+ 3	4.00	10.00	12.00	12.00
+
+Total waiting itme is : 30.00
+Total turnarond  itme is : 44.00
+Average  waiting itme is : 10.00
+Average turnarond time  is : 14.67
+
+
+Total no of nodes 1 
+[18bit034@mepcolinux recpu]$exit
+exit
+
+Script done on Thursday 12 September 2019 05:29:54 PM IST
+

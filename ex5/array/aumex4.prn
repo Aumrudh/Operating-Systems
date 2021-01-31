@@ -1,0 +1,225 @@
+Script started on Monday 22 July 2019 02:50:28 PM IST
+[?1034h[18bit034@mepcolinux ex4]$cat pr.c 
+//Programmed BY AUMRUDH LAL KUMAR TJ
+//PRIORITY
+#include<stdio.h>
+#include<string.h>
+struct process
+{
+char name[5];
+int at,bt,pr;
+};
+main()
+{
+struct process p[100];
+// struct process temp;
+int st[100],ft[100],wt[100],tat[100],totwt=0,tottat=0,n,i,j;
+float awt,atat;
+void sort(struct process p[],int i,int j);
+printf("\nEnter number of processes:");
+scanf("%d",&n);
+for(i=0;i<n;i++)
+{
+printf("\n%d",i+1);
+printf("\nEnter Process Name:");
+scanf("%s",p[i].name);
+printf("\nEnter Burst Time:");
+scanf("%d",&p[i].bt);
+printf("\nEnter Arrival time:");
+scanf("%d",&p[i].at);
+printf("\nEnter Priority:");
+scanf("%d",&p[i].pr);
+}
+for(i=0;i<n;i++)
+{
+for(j=0;j<n;j++)
+{
+sort(p,i,j);
+sort(p,i,j);
+}
+}
+for(i=0;i<n;i++)
+{
+if(i==0)
+{
+st[i]=p[i].at;
+wt[i]=st[i]-p[i].at;
+ft[i]=st[i]+p[i].bt;
+tat[i]=ft[i]-p[i].at;
+}
+else
+{
+st[i]=ft[i-1];
+ wt[i]=st[i]-p[i].at;
+        ft[i]=st[i]+p[i].bt;
+        tat[i]=ft[i]-p[i].at;
+      }
+totwt+=wt[i];
+tottat+=tat[i];
+}
+printf("\nProcess Name\tArrivaltime\tBursttime\tPriority\tWT\tTAT");
+for(i=0;i<n;i++)
+{
+printf("\n%s\t\t%d\t\t%d\t\t%d\t\t%d\t%d",p[i].name,p[i].at,p[i].bt,p[i].pr,wt[i],tat[i]);
+}
+awt=totwt/n;
+atat=tottat/n;
+printf("\nAverage Waiting Time: %.2f",awt);
+printf("\nAverage Turn Around Time:%.2f",atat);
+}
+void sort(struct process p[],int i,int j)
+{
+char temp[10];
+int t;
+strcpy(temp,p[i].name);
+strcpy(p[i].name,p[j].name);
+strcpy(p[j].name,temp);
+t=p[i].bt;
+p[i].bt=p[j].bt;
+p[j].bt=t;
+t=p[i].pr;
+p[i].pr=p[j].pr;
+p[j].pr=t;
+t=p[i].at;
+p[i].at=p[j].at;
+p[j].at=t;
+}
+
+
+[18bit034@mepcolinux ex4]$cc pr.c
+[18bit034@mepcolinux ex4]$./a.out 
+
+Enter number of processes:3
+
+1
+Enter Process Name:p1
+
+Enter Burst Time:4
+
+Enter Arrival time:0
+
+Enter Priority:2
+
+2
+Enter Process Name:p2
+
+Enter Burst Time:6
+
+Enter Arrival time:2
+
+Enter Priority:1
+
+3
+Enter Process Name:p3
+
+Enter Burst Time:10
+
+Enter Arrival time:1
+
+Enter Priority:3
+
+Process Name	Arrivaltime	Bursttime	Priority	WT	TAT
+p2		2		6		1		0	6
+p1		0		4		2		8	12
+p3		1		10		3		11	21
+Average Waiting Time: 6.00
+Average Turn Around Time:13.00[18bit034@mepcolinux ex4]$cat rr.c
+//Round Robin
+#include<stdio.h>
+struct process
+{
+int status,id,burst,wt,bal,tat;
+}p[20];
+
+main()
+{
+        int i=0,time=0,count=0,n,tq;
+        int twt=0,ttat=0;
+float awt,atat;
+        printf("\n Enter No of process:");
+        scanf("%d",&n);
+
+        for(i=0;i<n;i++)
+        {
+                printf("\n Enter the Process id:");
+                scanf("%d",&p[i].id);
+                printf("\n Enter the Burst time:");
+                scanf("%d",&p[i].burst);
+                p[i].bal=p[i].burst;
+                p[i].status=0;
+        }
+
+        printf("\n Enter The Time Quantum:");
+        scanf("%d",&tq);
+        i=0;
+        while(count<n)
+        {
+                if(p[i].status==0)
+                {
+                        if(p[i].bal<=tq)
+                        {
+                                time+=p[i].bal;
+                                p[i].wt=time-p[i].burst;
+                                p[i].tat=p[i].wt+p[i].burst;
+                                p[i].status=1;
+                                count++;
+                        }
+                        else
+                        {
+                                p[i].bal-=tq;
+                                time+=tq;
+                        }
+                }
+                i=(i+1)%n;
+        }
+  for(i=0;i<n;i++)
+{
+twt+=p[i].wt;
+ttat+=p[i].tat;
+}
+        awt=twt/n;
+        atat=(float)ttat/n;  
+        printf("Id\tBurst Time\tWaiting Time\tTAT\n");
+        for(i=0;i<n;i++)
+        {
+                printf("\n%d\t%d\t\t%d\t\t%d\t\n",p[i].id,p[i].burst,p[i].wt,p[i].tat);
+        }
+        printf("\nAverage Waiting Time:\t\t%.2f\nAverage Turn Around time\t%.2f",awt,atat);
+        printf("\n");
+
+}
+
+
+
+[18bit034@mepcolinux ex4]$cc rr.c
+[18bit034@mepcolinux ex4]$./a.out 
+
+ Enter No of process:3
+
+ Enter the Process id:1
+
+ Enter the Burst time:5
+
+ Enter the Process id:2
+
+ Enter the Burst time:2
+
+ Enter the Process id:3
+
+ Enter the Burst time:6
+
+ Enter The Time Quantum:2
+Id	Burst Time	Waiting Time	TAT
+
+1	5		6		11	
+
+2	2		2		4	
+
+3	6		7		13	
+
+Average Waiting Time:		5.00
+Average Turn Around time:	9.33
+[18bit034@mepcolinux ex4]$exit
+exit
+
+Script done on Monday 22 July 2019 02:51:50 PM IST

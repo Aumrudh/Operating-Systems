@@ -1,0 +1,233 @@
+Script started on Monday 01 July 2019 03:55:20 PM IST
+[18bit034@mepcolinux ex1]$cat cat.c
+//Programmed By AUMRUDH LAL KUMAR TJ
+////Program to Simulate Cat command
+#include<stdio.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<fcntl.h>
+#include<unistd.h>
+main(int argc,char *argv[])
+{
+    //display one file
+    int fd1,fd2;
+    char temp;
+    if(argc==2)
+      {
+         fd1=open(argv[1],O_RDONLY);
+         if(fd1==-1)
+         {
+           printf("Error\n");
+         }
+         else
+         {
+          while(read(fd1,&temp,1)>0)
+           {
+              printf("%c",temp);
+           }
+             close(fd1);
+         }
+       }
+    //display 2 file 
+    else if(argc==3)
+      {
+         fd1=open(argv[1],O_RDONLY);
+         fd2=open(argv[2],O_RDONLY);
+         if(fd1==-1|fd2==-1)
+         {
+           printf("Error\n"); 
+         }
+         else
+         {
+          while(read(fd1,&temp,1)>0)
+           {
+              printf("%c",temp);
+           }
+           while(read(fd2,&temp,1)>0)
+           {
+              printf("%c",temp);
+           }
+              close(fd1);
+              close(fd2);
+         }
+      }
+    //write file 1 to file 2
+    else if(argc==4&&argv[2]==">")
+      {
+         fd1=open(argv[1],O_RDONLY);
+         fd2=open(argv[2],O_RDONLY);
+         if(fd1==-1|fd2==-1)
+         {
+           printf("Error\n"); 
+         }
+         else
+         {
+          while(read(fd1,&temp,1)>0)
+           {
+            write(fd2,&temp,1);
+           }
+          close(fd1);
+          close(fd2);
+         }
+      }
+    //append file
+    else if(argc==4&&argv[2]==">>")
+      {
+         fd1=open(argv[1],O_RDONLY);
+         fd2=open(argv[2],O_RDONLY);
+         if(fd1==-1|fd2==-1)
+         {
+           printf("Error\n"); 
+         }
+         else
+         {
+          while(read(fd1,&temp,1)>0)
+           {
+            write(fd2,&temp,1);
+           }  
+          close(fd1);
+          close(fd2);
+         }
+       }
+    else
+     {
+       printf("Enter valid arguments\n");
+     }
+}
+[18bit034@mepcolinux ex1]$cc cat.c
+[18bit034@mepcolinux ex1]$./a.out a.txt
+aumrudh lal kumar
+[18bit034@mepcolinux ex1]$./a.out a.txt f1.txt
+aumrudh lal kumar
+MSEC
+[18bit034@mepcolinux ex1]$./a.out a.txt f1.txt>f2.txt
+[18bit034@mepcolinux ex1]$cat f2.txt 
+aumrudh lal kumar
+[18bit034@mepcolinux ex1]$./a.out a.txt>>f1.t
+[18bit034@mepcolinux ex1]$cat f1.txt
+MSEC
+aumrudh lal kumar
+[18bit034@mepcolinux ex1]$cat mv.c
+//Program to Simulate Move Command
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<fcntl.h>
+main(int argc,char * argval[])
+{
+int fd,fd2;
+char temp;
+if(argc==1)
+{
+printf("\nSpecify File name");
+}
+else
+{
+fd=open(argval[1],O_RDONLY);
+if(fd!=-1)
+{
+fd2=open(argval[2],O_RDWR|O_APPEND);
+if(fd2==-1)
+{
+fd2=open(argval[2],O_CREAT|O_RDWR|O_APPEND,S_IRWXU);
+}
+while(read(fd,&temp,1)>0)
+{
+write(fd2,&temp,1);
+printf("");
+}
+close(fd);
+unlink(argval[1]);
+close(fd2);
+}
+else
+{
+printf("\nSource File Not Available");
+}
+}
+[18bit034@mepcolinux ex1]$cc mv.c
+[18bit034@mepcolinux ex1]$./a.out mv.txt mv2.txt
+[18bit034@mepcolinux ex1]$cat mv2.txt 
+Welcome TO MSEC
+MSEC
+aumrudh lal kumar
+[18bit034@mepcolinux ex1]$cat grep.c 
+//Program to Simulate Grep Command
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<fcntl.h>
+#include<unistd.h>
+#include<string.h>
+main(int c,char*arg[])
+{
+        int fd,buffer=1,cmp_no=0,i=0;
+        char file[50],temp[50],word[15];
+      if(c==1)
+{
+printf("\nSpecify The Pattern and File Name");
+}
+else if(c==2)
+{
+printf("\nSpecify File Name");
+}
+else
+{
+  strcpy(word,arg[1]);
+         fd=open(arg[2],O_RDONLY);
+        while(buffer)
+        {
+                buffer=read(fd,file,1);
+                if(file[0]!='\n')
+                {
+                        temp[i]=file[0];
+                        i++;
+                }
+                else
+                {
+                        temp[i]='\0';
+                        if(strstr(temp,word)!=NULL)
+                        {
+                        printf("%s",word);
+    	                cmp_no++;
+                        }
+                        i=0;
+                }
+        }
+printf("\nOccurrence:%d\n",cmp_no);
+}
+}
+[18bit034@mepcolinux ex1]$cc grep.c 
+[18bit034@mepcolinux ex1]$./a.out lal a.txt
+lal
+Occurrence:1
+[18bit034@mepcolinux ex1]$cat ls.c 
+//Program to Simulate LS Command
+#include<stdio.h>
+#include<dirent.h>
+#include<stdlib.h>
+main(int argc,char* argv[])
+{
+    DIR *dp;
+    struct dirent *sd;
+    dp=opendir(argv[1]);
+    if(dp==NULL)
+     {
+        printf("Cannot open the directory\n");
+        exit(0);
+     }
+    else
+      {
+        while((sd=readdir(dp))!=NULL)
+         {
+          printf("%s\t",sd->d_name);
+         }
+      }
+     closedir(dp);
+}
+
+[18bit034@mepcolinux ex1]$./a.out test
+a.txt	..	a.txt]	.
+[18bit034@mepcolinux ex1]$exit
+exit
+Script done on Monday 01 July 2019 03:57:57 PM IST

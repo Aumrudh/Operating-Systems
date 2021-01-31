@@ -1,0 +1,415 @@
+Script started on Monday 09 September 2019 03:45:44 PM IST
+[18bit034@mepcolinux banklist]$cat bank.c 
+
+//IMPLEMENTATION OF DEADLOACK ALGORITHM (BANKERS ALGORITHM)
+
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+typedef struct RESOURCE
+{
+	int a,b,c,d;
+}resource;
+typedef struct listnode
+{
+	resource alloc;
+	resource max;
+	resource need;
+	resource need2;
+	int x;
+	int pno;
+	struct listnode *next;
+	
+}node;
+
+typedef node *ptrtonode;
+typedef ptrtonode list;
+typedef ptrtonode position;
+
+
+list initialize();
+void insert(list,resource,resource,int);
+void display(list,resource);
+void calculate(list,resource);
+int count(list);
+
+int count(list l)
+{
+position p;
+int countt=1;
+p=l->next;
+while(p!=NULL)
+{
+countt++;
+p=p->next;
+}
+return countt;
+}
+
+void calculate(list l,resource av)
+{
+display(l,av);
+int tot,counnt=0,zz=0,myarray[10];
+tot=count(l);
+
+position p=l->next;
+while(counnt<tot)
+{
+if((p->need2.a<=av.a)&&(p->need2.b<=av.b)&&(p->need2.c<=av.c)&&(p->need2.d<=av.d)&&(p->x==0))
+{
+av.a+=p->alloc.a;
+av.b+=p->alloc.b;
+av.c+=p->alloc.c;
+av.d+=p->alloc.d;
+p->x=1;
+myarray[counnt]=p->pno;
+p=l->next;
+counnt++;
+if(counnt==tot-1)
+break;
+}
+else
+{
+zz++;
+if(zz>tot*tot)
+{
+break;
+}
+}
+p=p->next;
+if(p==NULL)
+p=l->next;
+}
+if(counnt!=tot-1)
+printf("\n deadlock is occour\n");
+else
+{
+int i;
+printf("\n SAFE SEQUENCE\n");
+for(i=0;i<counnt;i++)
+{
+printf("p%d\t",myarray[i]);
+}
+printf("\n\n");
+}
+}
+void insert(list l,resource A,resource B,int pn)
+{
+
+
+position temp1;
+temp1=initialize();
+temp1->pno=pn;
+temp1->need=B;
+temp1->alloc=A;
+temp1->need2.a = temp1->need.a-temp1->alloc.a;
+temp1->need2.b = temp1->need.b-temp1->alloc.b;
+temp1->need2.c = temp1->need.c-temp1->alloc.c;
+temp1->need2.d = temp1->need.d-temp1->alloc.d;
+temp1->x=0;
+position p1,q;
+q=l;
+p1=l->next;
+while(p1!=NULL)
+{
+q=q->next;
+p1=p1->next;
+}
+temp1->next=NULL;
+p1=temp1;
+q->next=p1;
+}
+
+
+
+
+position initialize()
+{
+position temp;
+temp=(position)malloc(sizeof(position)*1);
+if(temp==NULL)
+{
+printf("\n error in initialize\n");
+ }
+else
+{
+temp->alloc.a=0;
+temp->alloc.b=0;
+temp->alloc.c=0;
+temp->alloc.d=0;
+temp->max.a=0;
+temp->max.b=0;
+temp->max.c=0;
+temp->max.d=0;
+temp->need.a=0;
+temp->need.b=0;
+temp->need.c=0;
+temp->need.d=0;
+temp->next=NULL;
+
+return temp;
+  }
+}
+
+
+
+
+void display(list l,resource al)
+{
+float avgwt,avgtt,tottt=0,totwt=0;
+int c=0;
+position p;
+p=l->next;
+int i=1;
+
+printf("\nPNO\tALLOC\tMAX\tAVL\tNEED\n");
+while(p!='\0')
+{
+printf("\n%d\t%d%d%d%d\t",p->pno,p->alloc.a,p->alloc.b,p->alloc.c,p->alloc.d);
+
+printf("%d%d%d%d\t",p->need.a,p->need.b,p->need.c,p->need.d);
+if(i==1)
+printf("%d%d%d%d\t",al.a,al.b,al.c,al.d);
+else
+printf("    \t");
+printf("%d%d%d%d\n",p->need2.a,p->need2.b,p->need2.c,p->need2.d);
+p=p->next;
+i++;
+}
+
+}
+
+
+main()
+{
+	list l1;
+	l1=initialize();
+	int i,n,pp;
+	resource avl;
+	printf("\n enter totel no of processes\n");
+	scanf("%d",&n);
+	for(i=0;i<n;i++)
+	{
+
+		resource aa,bb;
+		printf("\n enter process no\n");
+		scanf("%d",&pp);
+		printf("\n enter process %d details\n",pp);
+		printf("\n enter max A, B,C,D values\n");
+		scanf("%d%d%d%d",&bb.a,&bb.b,&bb.c,&bb.d);
+		printf("\n enter allocation A, B,C,D values\n");
+		scanf("%d%d%d%d",&aa.a,&aa.b,&aa.c,&aa.d);
+		insert(l1,aa,bb,pp);
+	}
+	printf("\n enter available A,B,C,D values\n");
+	  scanf("%d%d%d%d",&avl.a,&avl.b,&avl.c,&avl.d);
+	calculate(l1,avl);	
+}
+[18bit034@mepcolinux banklist]$./a.out 
+
+ enter totel no of processes
+5
+
+ enter process no
+0
+
+ enter process 0 details
+
+ enter max A, B,C,D values
+0 0 1 2
+
+ enter allocation A, B,C,D values
+0 0 1 2
+
+ enter process no
+1
+
+ enter process 1 details
+
+ enter max A, B,C,D values
+1 7 5 0
+
+ enter allocation A, B,C,D values
+1 0 0 0
+
+ enter process no
+2
+
+ enter process 2 details
+
+ enter max A, B,C,D values
+2 3 5 6
+
+ enter allocation A, B,C,D values
+1 3 5 4
+
+ enter process no
+3
+
+ enter process 3 details
+
+ enter max A, B,C,D values
+0 6 5 2
+
+ enter allocation A, B,C,D values
+0 6 3 2
+
+ enter process no
+4
+
+ enter process 4 details
+
+ enter max A, B,C,D values
+0 6 5 6
+
+ enter allocation A, B,C,D values
+0 0 1 4
+
+ enter available A,B,C,D values
+1 5 2 0
+
+PNO	ALLOC	MAX	AVL	NEED
+
+0	0012	0012	1520	0000
+
+1	1000	1750	    	0750
+
+2	1354	2356	    	1002
+
+3	0632	0652	    	0020
+
+4	0014	0656	    	0642
+
+ SAFE SEQUENCE
+p0	p2	p1	p3	p4	
+
+
+
+//Deadlock Avoidance (ie) Bankers Algorithm
+//PROGRAMMED BY AUMRUDH LAL KUMAR TJ
+#include<stdio.h>
+
+main()
+{
+
+    int k=0,output[10],d=0,t=0,ins[5],i,avail[5],allocated[10][5],need[10][5],MAX[10][5],pno,P[10],j,rz, count=0;
+    printf("\nEnter the number of resources : ");
+    scanf("%d", &rz);
+
+    printf("\nEnter the max instances of each resources\n");
+    for(i=0;i<rz;i++)
+    {
+     avail[i]=0;
+     printf("%c= ",(i+97));
+     scanf("%d",&ins[i]);
+    }
+
+    printf("\nEnter the number of processes : ");
+    scanf("%d", &pno);
+
+    printf("\nEnter the allocation matrix \n\n   ");
+    for(i=0;i<rz;i++)
+    printf(" %c",(i+97));
+    printf("\n");
+    for(i=0;i <pno;i++)
+     {
+        P[i]=i;
+        printf("P%d  ",P[i]);
+        for(j=0;j<rz;j++)
+         {
+	  scanf("%d",&allocated[i][j]);
+	  avail[j]+=allocated[i][j];
+         }
+     }
+
+   printf("\nEnter the MAX matrix\n\n    ");
+   for(i=0;i<rz;i++)
+    {
+      printf(" %c",(i+97));
+      avail[i]=ins[i]-avail[i];
+    }
+   printf("\n");
+   for(i=0;i <pno;i++)
+   {
+     printf("P%d  ",i);
+     for(j=0;j<rz;j++)
+     {
+     scanf("%d", &MAX[i][j]);
+     }
+   }
+
+  printf("\n");
+  A: d=-1;
+  for(i=0;i <pno;i++)
+  {
+    count=0;
+    t=P[i];
+    for(j=0;j<rz;j++)
+     {
+       need[t][j] = MAX[t][j]-allocated[t][j];
+       if(need[t][j]<=avail[j])
+       count++;
+     }
+    if(count==rz)
+     {
+      output[k++]=P[i];
+      for(j=0;j<rz;j++)
+      avail[j]+=allocated[t][j];
+     }
+    else
+     {
+      P[++d]=P[i];
+     }
+  }
+
+   if(d!=-1)
+   {
+     pno=d+1;
+     goto A;
+   }
+
+   printf("\t <");
+   for(i=0;i<k;i++)
+    {
+      printf(" P%d ",output[i]);
+    }
+   printf(">\n\n");
+}
+[18bit034@mepcolinux ex7]$./a.out 
+
+Enter the number of resources : 4
+
+Enter the max instances of each resources
+a= 3
+b= 14
+c= 12
+d= 12
+
+Enter the number of processes : 5
+
+Enter the allocation matrix 
+
+    a b c d
+P0  0 0 1 2
+P1  1 0 0 0
+P2  1 3 5 4
+P3  0 6 3 2
+P4  0 0 1 4
+
+Enter the MAX matrix
+
+     a b c d
+P0   0 0 1 2
+P1   1 7 5 0
+P2   2 3 5 6
+P3   0 6 5 2
+P4   0 6 5 6
+
+	 < P0  P2  P3  P4  P1 >
+
+
+
+[18bit034@mepcolinux banklist]$exit
+exit
+
+Script done on Monday 09 September 2019 03:46:43 PM IST

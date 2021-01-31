@@ -1,0 +1,245 @@
+Script started on Monday 05 August 2019 02:39:02 PM IST
+[18bit034@mepcolinux ex5]$cat odd.c 
+//Program FOR SHARED MEMORY COMMUNICATION
+//PROGRAMMED BY AUMRUDH LAL KUMAR TJ
+#include<stdio.h>
+#include<sys/shm.h>
+#include<unistd.h>
+#include<sys/ipc.h>
+main()
+{
+ int x,*a,id,n;
+ id=shmget(IPC_PRIVATE,sizeof(int)*1,IPC_CREAT|0766);
+ if(id==-1)
+ {
+  printf("Shared memory creation failed !");
+ }
+ else
+ {
+  a=(int*)shmat(id,NULL,0);
+  x=fork();
+  if(x==-1)
+  {
+   printf("Child process creation failed !");
+  }
+  if(x==0) 
+  {
+   printf("Enter a number :");
+   scanf("%d",&n);
+   *a=n;
+  }
+  else if(x>0)
+  {
+   wait(&x);
+   if(*a%2==0)
+   {
+    printf("The number %d is even !\n",*a);
+   }
+   else
+   {
+    printf("The number %d is odd !\n",*a);
+   }
+  }
+ }
+}
+[18bit034@mepcolinux ex5]$cc odd.c 
+[18bit034@mepcolinux ex5]$./a.out 
+Enter a number :5
+The number 5 is odd !
+[18bit034@mepcolinux ex5]$./a.out 
+Enter a number :4
+The number 4 is even !
+[18bit034@mepcolinux ex5]$cat sum.c 
+//Programmed By AUMRUDH LAL KUMAR TJ
+#include<stdio.h>
+#include<unistd.h>
+#include<sys/ipc.h>
+#include<sys/shm.h>
+#include<stdlib.h>
+main()
+{
+    int shmid,n,p,*m,no[20],sum=0,i;
+    printf("Enter the count of NUMBER : ");
+    scanf(" %d",&n);
+    shmid=shmget(IPC_PRIVATE,n*sizeof(int),IPC_CREAT|0766);
+    if(shmid==-1)
+      {
+       printf("Error in Shared Memory Creation\n");
+       exit(0);
+      }
+    m=(int*)shmat(shmid,NULL,0);
+    p=fork();
+    if(p<0)
+      {
+        printf("Error in process Creation\n");
+        exit(0);
+      }
+    else if(p==0)
+      {
+        printf("Enter the NUMBERS : ");
+        for(i=0;i<n;i++)
+        {
+          scanf(" %d",&no[i]);
+        }
+        m=&no;
+      }
+    else if(p>0)
+     {
+       if(*m==NULL)
+         {
+          wait(&p);
+         }
+       for(i=0;i<=n;i++)
+         {
+           sum+=*m+i;
+         }
+       printf("%d is SUM\n",sum);
+     }
+    else
+     {
+       printf("\n");
+     }
+}
+
+[18bit034@mepcolinux ex5]$cc sum.c 
+[18bit034@mepcolinux ex5]$./a.out 
+Enter the count of NUMBER : 5
+Enter the NUMBERS : 12    2 3 4 5
+15 is SUM
+[18bit034@mepcolinux ex5]$cat vow.c 
+#include<sys/wait.h>
+#include<sys/ipc.h>
+#include<string.h>
+#include<sys/shm.h>
+#include<unistd.h>
+#include<stdio.h>
+#include<stdlib.h>
+int main()
+{
+        int i,d,n;
+        char a[10],temp,(*m)[10];
+        pid_t x;
+        /*printf("\n Enter no of process:");
+ *         scanf("%d",&n);*/
+        d= shmget(IPC_PRIVATE,sizeof(char),IPC_CREAT|0766);
+        m=(char*)shmat(d,NULL,0);
+        if((x=fork()) == -1)
+        {
+                printf("Error in creating process\n\n");
+                exit(1);
+        }
+        else if(x == 0)
+        {
+                printf("Enter String\t");
+                if(a!='\n')
+                 scanf("%s",a);
+	//n=strlen(a);
+                strcpy(*m,a);
+         }
+        else if(x>0)
+        {      
+                wait(&x);
+                int j,count=0;
+                char temp[10];
+                strcpy(temp,*m);
+                for(j=0;j<strlen(temp);j++)
+                {
+                   if(temp[j]=='a'||temp[j]=='e'||temp[j]=='i'||temp[j]=='o'||temp[j]=='u')
+                                        count++;
+                }
+                        printf(" %d vowels\n",count);
+                }
+return(0);
+}
+
+[18bit034@mepcolinux ex5]$cc vow.c 
+Enter String
+aumrudh
+ 3 vowels
+[18bit034@mepcolinux ex5]$cat mat.c 
+#include<sys/wait.h>
+#include<string.h>
+#include<sys/shm.h>
+#include<unistd.h>
+#include<stdio.h>
+#include<stdlib.h>
+int main()
+{
+        int shmid,i,j;
+        int (*m1)[4][4],(*m2)[4][4],a[4][4],b[4][4];
+        pid_t x;
+      shmid = shmget(IPC_PRIVATE,64*sizeof(int),IPC_CREAT|0766);
+       if(shmid == -1)
+        {
+                printf("Failed to create Shared_Memory\n\n");
+                exit(1);
+        }
+        m1= (int**)shmat(shmid,NULL,0);
+        m2= (int**)shmat(shmid,NULL,0);
+        if((x=fork()) == -1)
+        {
+                printf("Error in creating process\n\n");
+                exit(1);
+        }
+        else if(x == 0)
+        {
+          printf("\n Enter the 1st matrix:");
+          for(i=0;i<4;i++)
+          {
+              for(j=0;j<4;j++)
+               {
+                 scanf("%d",&a[i][j]);
+               }
+           }
+         printf("\n Enter te 2st matrix:");
+          for(i=0;i<4;i++)
+          {
+           for(j=0;j<4;j++)
+             scanf("%d",&b[i][j]);
+         }
+          for(i=0;i<4;i++)
+          {
+           for(j=0;j<4;j++)
+           {
+          *m1[i][j]=a[i][j];
+          *m2[i][j]=b[i][j];
+          }
+         }
+        }
+         else
+         {
+           wait(&x);
+           int res[4][4];
+           for(i=0;i<4;i++)
+           {  for(j=0;j<4;j++)
+               res[i][j]=*m1[i][j]+*m2[i][j];
+           }
+           printf("\n The resulant matrix:\n");
+          for(i=0;i<4;i++)
+          {
+             for(j=0;j<4;j++)
+             {  printf("%d\t",res[i][j]);
+
+             }
+             printf("\n");
+}
+       }
+return(0);
+}
+
+[18bit034@mepcolinux ex5]$cc mat.c 
+[18bit034@mepcolinux ex5]$./a.out 
+
+ Enter the 1st matrix:1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+
+ Enter te 2st matrix:1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+
+ The resulant matrix:
+2	4	6	8	
+10	12	14	16	
+18	20	22	24	
+26	28	30	32	
+[18bit034@mepcolinux ex5]$exit
+exit
+
+Script done on Monday 05 August 2019 02:40:52 PM IST
